@@ -1,6 +1,6 @@
 <?php
 
-namespace Mobly\Cache\Adapter;
+namespace Mobly\Cache\Adapter\Aerospike;
 
 use Mobly\Cache\AbstractCacheAdapter;
 use Mobly\Cache\CacheAdapterConfiguration;
