@@ -57,7 +57,7 @@ class AerospikeAdapter extends AbstractCacheAdapter
 
     /**
      * @param CacheAdapterConfiguration $configuration
-     * @return MemcachedAdapter
+     * @return AerospikeAdapter
      */
     public static function getInstance(CacheAdapterConfiguration $configuration)
     {
@@ -116,9 +116,41 @@ class AerospikeAdapter extends AbstractCacheAdapter
     protected function fetchObjectFromCache($key)
     {
         $cacheItem = new CacheItem($key);
-        $this->getObjectByKey($cacheItem, $key);
+
+        $transformedKey = $this->transformKey($key);
+
+        $status = $this->cache->get($transformedKey, $record);
+        if ($status == \Aerospike::OK) {
+            $cacheItem->set($record['bins'][self::AEROSPIKE_BIN ]);
+        }
 
         return $cacheItem;
+    }
+
+    /**
+     * @param array $keys
+     * @return array CacheItemInterface
+     */
+    protected function fetchMultiObjectsFromCache(array $keys)
+    {
+        $items = [];
+        $initKeys = [];
+
+        foreach ($keys as $key) {
+            $initKeys[] = $this->transformKey($key);
+        }
+
+        $status = $this->cache->getMany($initKeys, $records);
+        if ($status == \Aerospike::OK) {
+            foreach ($records as $record) {
+                $key = $record['key']['key'];
+                $cacheItem = new CacheItem($key);
+                $cacheItem->set($record['bins'][self::AEROSPIKE_BIN ]);
+                $items[$key] = $cacheItem;
+            }
+        }
+
+        return $items;
     }
 
     /**
