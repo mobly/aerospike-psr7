@@ -145,7 +145,9 @@ class AerospikeAdapter extends AbstractCacheAdapter
             foreach ($records as $record) {
                 $key = $record['key']['key'];
                 $cacheItem = new CacheItem($key);
-                $cacheItem->set($record['bins'][self::AEROSPIKE_BIN ]);
+                if ($record['bins'][self::AEROSPIKE_BIN ] !== null) {
+                    $cacheItem->set($record['bins'][self::AEROSPIKE_BIN ]);
+                }
                 $items[$key] = $cacheItem;
             }
         }
