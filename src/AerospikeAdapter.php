@@ -5,15 +5,12 @@ namespace Mobly\Cache\Adapter\Aerospike;
 use Mobly\Cache\AbstractCacheAdapter;
 use Mobly\Cache\CacheAdapterConfiguration;
 use Mobly\Cache\CacheItem;
+use Mobly\Cache\Interfaces\ConfigurationInterface;
 use Mobly\Cache\Exception\CacheException;
 use Psr\Cache\CacheItemInterface;
 
 class AerospikeAdapter extends AbstractCacheAdapter
 {
-
-    const AEROSPIKE_NAMESPACE = 'namespace';
-
-    const AEROSPIKE_SET = 'set';
 
     const AEROSPIKE_BIN = 'bin';
 
@@ -33,9 +30,9 @@ class AerospikeAdapter extends AbstractCacheAdapter
     private $configuration;
 
     /**
-     * @param CacheAdapterConfiguration $configuration
+     * @param ConfigurationInterface $configuration
      */
-    protected function __construct(CacheAdapterConfiguration $configuration)
+    protected function __construct(ConfigurationInterface $configuration)
     {
         $this->configuration = $configuration;
 
@@ -56,10 +53,10 @@ class AerospikeAdapter extends AbstractCacheAdapter
     }
 
     /**
-     * @param CacheAdapterConfiguration $configuration
+     * @param ConfigurationInterface $configuration
      * @return AerospikeAdapter
      */
-    public static function getInstance(CacheAdapterConfiguration $configuration)
+    public static function getInstance(ConfigurationInterface $configuration)
     {
         if (null === static::$instance) {
             static::$instance = new static($configuration);
@@ -81,9 +78,9 @@ class AerospikeAdapter extends AbstractCacheAdapter
     }
 
     /**
-     * @param CacheAdapterConfiguration $configuration
+     * @param ConfigurationInterface $configuration
      */
-    public function setConfiguration(CacheAdapterConfiguration $configuration)
+    public function setConfiguration(ConfigurationInterface $configuration)
     {
         $this->configuration = $configuration;
     }
@@ -106,7 +103,7 @@ class AerospikeAdapter extends AbstractCacheAdapter
      */
     protected function transformKey($key)
     {
-        return $this->cache->initKey(self::AEROSPIKE_NAMESPACE, self::AEROSPIKE_SET, $key);
+        return $this->cache->initKey($this->configuration->getNamespace(), $this->configuration->getSet(), $key);
     }
 
     /**
@@ -171,7 +168,7 @@ class AerospikeAdapter extends AbstractCacheAdapter
 
     protected function clearAllObjectsFromCache()
     {
-        $this->cache->scan(self::AEROSPIKE_NAMESPACE, self::AEROSPIKE_SET, function ($record) {
+        $this->cache->scan($this->configuration->getNamespace(), $this->configuration->getSet(), function ($record) {
             if (isset($record['key']['key'])) {
                 $this->deleteItem($record['key']['key']);
             }
