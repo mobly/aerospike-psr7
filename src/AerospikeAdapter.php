@@ -39,7 +39,10 @@ class AerospikeAdapter extends AbstractCacheAdapter
         $connectionConfig = $this->buildConnectionConfig();
 
         $this->cache = new \AeroSpike($connectionConfig, $this->configuration->getPersistent());
-        $this->checkConnection();
+
+        if ($this->configuration->shouldCheckConnection()) {
+            $this->checkConnection();
+        }
     }
 
     /**
